@@ -1,8 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { SwaggerConfigInit } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
+  SwaggerConfigInit(app);
+
+  const { APP_PORT } = process.env;
+  const { DB_USERNAME, DB_PASSWORD } = process.env;
+  console.log(DB_USERNAME);
+  console.log(DB_PASSWORD);
+  await app.listen(APP_PORT, () => {
+    console.log(`app is running at port ${APP_PORT}`);
+  });
 }
 bootstrap();

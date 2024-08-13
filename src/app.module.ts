@@ -3,14 +3,16 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { TypeOrmConfig } from './config/Typeorm.config';
+import { UserModule } from './module/user/user.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(TypeOrmConfig()),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: join(process.cwd(), '.env'),
     }),
+    TypeOrmModule.forRoot(TypeOrmConfig()),
+    UserModule,
   ],
   controllers: [],
   providers: [],

@@ -6,6 +6,7 @@ export enum BadRequestMessage {
 export enum AuthMessage {
   NotFoundMessage = 'یوزی یافت نشد',
   AlReadyExistAccount = 'یوزر موجود است',
+  OtpNotExpires = 'زمان کد هنوز منقظی نشده است',
 }
 
 export enum NotFoundMessage {}

@@ -14,6 +14,7 @@ declare global {
 
       COOKIE_SECRET: string;
       OTP_TOKEN_SECRET: string;
+      ACCESS_TOKEN_SECRET: string;
     }
   }
 }

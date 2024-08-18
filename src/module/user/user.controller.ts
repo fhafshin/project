@@ -6,7 +6,6 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('User')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
   @Get()
   findAll() {
     return 'Hello World....';

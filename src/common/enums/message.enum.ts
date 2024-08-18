@@ -9,6 +9,10 @@ export enum AuthMessage {
   OtpNotExpires = 'زمان کد هنوز منقظی نشده است',
 }
 
+export enum PublicMessage {
+  sendOtp = 'کد ارسال شد',
+}
+
 export enum NotFoundMessage {}
 
 export enum ValidationMessage {}

@@ -11,12 +11,19 @@ import { AuthDto } from './dto/auth.dto';
 import { AuthMethod } from './enums/method.enum';
 import { AuthType } from './enums/type.enum';
 import { isEmail, isPhoneNumber } from 'class-validator';
-import { AuthMessage, BadRequestMessage } from 'src/common/enums/message.enum';
+import {
+  AuthMessage,
+  BadRequestMessage,
+  PublicMessage,
+} from 'src/common/enums/message.enum';
 import { ProfileEntity } from '../user/entity/profile.entity';
 import { UserEntity } from '../user/entity/user.entity';
 import { OtpEntity } from '../user/entity/otp.entity';
 import { randomInt } from 'crypto';
-
+import { TokenService } from './tokens.service';
+import { Response } from 'express';
+import { AuthResponse } from './types/response';
+import { CookieKeys } from 'src/common/enums/cookie.enum';
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,21 +33,29 @@ export class AuthService {
     private profileRepository: Repository<ProfileEntity>,
     @InjectRepository(OtpEntity)
     private otpRepository: Repository<OtpEntity>,
+    private tokenService: TokenService,
   ) {}
 
-  userExistence(data: AuthDto) {
+  async userExistence(data: AuthDto, res: Response) {
     const { method, type, username } = data;
-
+    let result;
     switch (type) {
       case AuthType.Login:
-        return this.login(method, username);
+        result = await this.login(method, username);
+        this.sendResponse(res, result);
 
       case AuthType.Register:
-        return this.register(method, username);
-
+        result = await this.register(method, username);
+        this.sendResponse(res, result);
       default:
         throw new UnauthorizedException();
     }
+  }
+
+  async sendResponse(res: Response, result: AuthResponse) {
+    const { token, code } = result;
+    res.cookie(CookieKeys.OTP, token, { httpOnly: true });
+    res.json({ message: PublicMessage.sendOtp, code });
   }
 
   private async login(method: AuthMethod, username: string) {
@@ -54,7 +69,9 @@ export class AuthService {
     if (!user) throw new UnauthorizedException(AuthMessage.NotFoundMessage);
 
     const otp = await this.sendAndSaveOtp(user.id);
-    return { code: otp.code };
+
+    const token = this.tokenService.createOtpToken({ userId: user.id });
+    return { code: otp.code, token };
   }
   private async register(method: AuthMethod, username: string) {
     const validUsername = this.usernameValidator(method, username);
@@ -66,11 +83,18 @@ export class AuthService {
     );
 
     if (user) throw new ConflictException(AuthMessage.AlReadyExistAccount);
+    if (method === 'username')
+      throw new BadRequestException(BadRequestMessage.InvalidRegisterData);
 
     user = this.userRepository.create({ [method]: username });
     user = await this.userRepository.save(user);
+    user.username = `M_${user.id}`;
+    await this.userRepository.save(user);
     const otp = await this.sendAndSaveOtp(user.id);
+    const token = this.tokenService.createOtpToken({ userId: user.id });
+
     return {
+      token,
       code: otp.code,
     };
   }

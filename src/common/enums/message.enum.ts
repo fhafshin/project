@@ -22,3 +22,7 @@ export enum PublicMessage {
 export enum NotFoundMessage {}
 
 export enum ValidationMessage {}
+
+export enum ConflictMessage {
+  CategoryTitle = 'عنوان موجود است',
+}

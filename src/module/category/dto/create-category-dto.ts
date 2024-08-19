@@ -1,12 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
 export class CreateCategoryDto {
-  @ApiProperty()
+  @ApiProperty({ type: 'string' })
   @IsString()
   title: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional({ type: 'integer' })
   @IsOptional()
   priority: number;
 }

@@ -8,5 +8,4 @@ export class CategoryEntity extends BaseEntity {
   title: string;
   @Column({ nullable: true })
   priority: number;
-  
 }

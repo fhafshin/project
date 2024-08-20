@@ -17,9 +17,17 @@ export enum PublicMessage {
   sendOtp = 'کد ارسال شد',
   LoggedIn = 'با موفقیت وارد حساب کاربری خود شدید',
   Created = 'با موفقیت ایجاد شد',
+  Deleted = 'با موفقیت حذف شد',
+  Updated = 'با موفقیت به روز رسانی شد',
+  Inserted = 'با موفقیت اضافه شد',
 }
 
-export enum NotFoundMessage {}
+export enum NotFoundMessage {
+  NotFound = 'موردی یافت نشد',
+  NotFoundUser = 'کاربری یافت نشد',
+  NotFoundPost = 'مقاله ای یافت نشد',
+  NotFoundCategory = 'دسته بندی یافت نشد',
+}
 
 export enum ValidationMessage {}
 

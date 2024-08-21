@@ -1,9 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, Length } from 'class-validator';
+import { IsEnum, IsOptional, Length } from 'class-validator';
 import { Gender } from '../enums/gender.enum';
 
 export class ProfileDto {
   @ApiPropertyOptional({ default: '' })
+  @IsOptional()
   @Length(3, 50)
   nik_name: string;
   @ApiPropertyOptional()

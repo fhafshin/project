@@ -29,7 +29,9 @@ export enum NotFoundMessage {
   NotFoundCategory = 'دسته بندی یافت نشد',
 }
 
-export enum ValidationMessage {}
+export enum ValidationMessage {
+  InvalidImageFormat = 'فرمت فایل صحیح نیست',
+}
 
 export enum ConflictMessage {
   CategoryTitle = 'عنوان موجود است',

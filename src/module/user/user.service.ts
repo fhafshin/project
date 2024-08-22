@@ -1,14 +1,17 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Scope } from '@nestjs/common';
 import { ProfileDto } from './dto/create-profile-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProfileEntity } from './entity/profile.entity';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { UserEntity } from './entity/user.entity';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
-import { isDate } from 'class-validator';
+import { isDate, NotEquals } from 'class-validator';
 import { Gender } from './enums/gender.enum';
 import { ProfileImages } from './types/file';
+import { ConflictMessage } from 'src/common/enums/message.enum';
+import { AuthService } from '../auth/auth.service';
+import { TokenService } from '../auth/tokens.service';
 
 @Injectable({ scope: Scope.REQUEST })
 export class UserService {
@@ -18,6 +21,8 @@ export class UserService {
     @InjectRepository(UserEntity)
     private userRepository: Repository<UserEntity>,
     @Inject(REQUEST) private request: Request,
+    private authService: AuthService,
+    private tokenService: TokenService,
   ) {}
 
   async changeProfile(files: ProfileImages, data: ProfileDto) {
@@ -75,5 +80,24 @@ export class UserService {
       where: { id },
       relations: ['profile'],
     });
+  }
+
+  async changeEmail(email: string) {
+    const { id } = this.request.user;
+    console.log(email);
+    const user = await this.userRepository.findOne({
+      where: { email: email },
+    });
+
+    if (user && user.id !== id)
+      throw new ConflictException(ConflictMessage.Email);
+    else if (user && user.id === id) return { message: 'updated' };
+    user.new_email = email;
+    const otp = await this.authService.sendAndSaveOtp(id);
+    const token = this.tokenService.createEmailToken({ email });
+    return {
+      code: otp.code,
+      token,
+    };
   }
 }

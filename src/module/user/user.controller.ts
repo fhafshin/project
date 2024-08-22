@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Post,
   Put,
   UseGuards,
   UseInterceptors,
@@ -15,7 +16,8 @@ import { MulterStorage } from 'src/common/utils/multer.util';
 import { authguard } from '../auth/guards/auth.guard';
 import { ProfileImages } from './types/file';
 import { UploadedOptionalFiles } from 'src/common/decorators/upload-file.decorator';
-
+@UseGuards(authguard)
+@ApiBearerAuth('Authorization')
 @Controller('/users')
 @ApiTags('User')
 export class UserController {
@@ -24,8 +26,7 @@ export class UserController {
   findAll() {
     return 'Hello World....';
   }
-  @UseGuards(authguard)
-  @ApiBearerAuth('Authorization')
+
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -48,10 +49,14 @@ export class UserController {
     console.log(files);
     return this.userService.changeProfile(files, data);
   }
-  @UseGuards(authguard)
-  @ApiBearerAuth('Authorization')
+
   @Get('/profile')
   profile() {
     return this.userService.profile();
+  }
+
+  @Post('edit-email')
+  changeEmail(@Body('email') email: string) {
+    return this.userService.changeEmail(email);
   }
 }

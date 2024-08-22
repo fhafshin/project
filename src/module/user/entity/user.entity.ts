@@ -25,6 +25,12 @@ export class UserEntity extends BaseEntity {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column({ nullable: true })
+  new_email: string;
+  @Column({ nullable: true, default: false })
+  verify_email: boolean;
+  @Column({ nullable: true, default: false })
+  verify_phone: boolean;
   @OneToOne(() => ProfileEntity, (profile) => profile.user, { nullable: true })
   profile: ProfileEntity;
 

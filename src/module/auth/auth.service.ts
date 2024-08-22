@@ -98,6 +98,8 @@ export class AuthService {
     user.username = `M_${user.id}`;
     await this.userRepository.save(user);
     const otp = await this.sendAndSaveOtp(user.id);
+    otp.method = method;
+    await this.otpRepository.save(otp);
     const token = this.tokenService.createOtpToken({ userId: user.id });
 
     return {
@@ -124,13 +126,19 @@ export class AuthService {
       userId: otp.userId,
     });
 
+    if (otp.method === AuthMethod.Email) {
+      await this.userRepository.update({ id: userId }, { verify_email: true });
+    } else if (otp.method === AuthMethod.Phone) {
+      await this.userRepository.update({ id: userId }, { verify_phone: true });
+    }
+
     return {
       message: PublicMessage.LoggedIn,
       accessToken,
     };
   }
 
-  private async sendAndSaveOtp(userId: number) {
+  async sendAndSaveOtp(userId: number) {
     const code = randomInt(10000, 99999).toString();
     const expiresIn = new Date(Date.now() + 60 * 1000 * 2);
 

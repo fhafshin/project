@@ -1,6 +1,7 @@
 export enum BadRequestMessage {
   InvalidLoginData = 'اطلاعات ارسال شده برای احراز هویت صحیح نمی باشد',
   InvalidRegisterData = 'اطلاعات ارسال شده برای ثبت نام صحیح نمی باشد',
+  someThingWrong = 'خطایی پیش امده است',
 }
 
 export enum AuthMessage {
@@ -35,4 +36,5 @@ export enum ValidationMessage {
 
 export enum ConflictMessage {
   CategoryTitle = 'عنوان موجود است',
+  Email = 'ایمیل تکراری است',
 }

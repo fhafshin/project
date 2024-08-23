@@ -27,6 +27,7 @@ import { Request, Response } from 'express';
 import { AuthResponse } from './types/response';
 import { CookieKeys } from 'src/common/enums/cookie.enum';
 import { REQUEST } from '@nestjs/core';
+import { CookiesOptionsToken } from 'src/common/utils/cookiesOptionsToken';
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
   constructor(
@@ -58,10 +59,7 @@ export class AuthService {
 
   async sendResponse(res: Response, result: AuthResponse) {
     const { token, code } = result;
-    res.cookie(CookieKeys.OTP, token, {
-      httpOnly: true,
-      expires: new Date(Date.now() + 60 * 1000 * 2),
-    });
+    res.cookie(CookieKeys.OTP, token, CookiesOptionsToken());
     res.json({ message: PublicMessage.sendOtp, code });
   }
 
@@ -75,7 +73,7 @@ export class AuthService {
 
     if (!user) throw new UnauthorizedException(AuthMessage.NotFoundMessage);
 
-    const otp = await this.sendAndSaveOtp(user.id);
+    const otp = await this.sendAndSaveOtp(user.id, method);
 
     const token = this.tokenService.createOtpToken({ userId: user.id });
     return { code: otp.code, token };
@@ -97,9 +95,8 @@ export class AuthService {
     user = await this.userRepository.save(user);
     user.username = `M_${user.id}`;
     await this.userRepository.save(user);
-    const otp = await this.sendAndSaveOtp(user.id);
-    otp.method = method;
-    await this.otpRepository.save(otp);
+    const otp = await this.sendAndSaveOtp(user.id, method);
+
     const token = this.tokenService.createOtpToken({ userId: user.id });
 
     return {
@@ -138,18 +135,19 @@ export class AuthService {
     };
   }
 
-  async sendAndSaveOtp(userId: number) {
+  async sendAndSaveOtp(userId: number, method: AuthMethod) {
     const code = randomInt(10000, 99999).toString();
     const expiresIn = new Date(Date.now() + 60 * 1000 * 2);
 
     let otp = await this.otpRepository.findOneBy({ userId });
     if (!otp) {
-      otp = this.otpRepository.create({ code, expiresIn, userId });
+      otp = this.otpRepository.create({ code, expiresIn, userId, method });
     } else {
       if (otp.expiresIn > new Date())
         throw new BadRequestException(AuthMessage.OtpNotExpires);
       otp.code = code;
       otp.expiresIn = expiresIn;
+      otp.method = method;
     }
     otp = await this.otpRepository.save(otp);
     return otp;

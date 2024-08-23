@@ -2,6 +2,7 @@ export enum BadRequestMessage {
   InvalidLoginData = 'اطلاعات ارسال شده برای احراز هویت صحیح نمی باشد',
   InvalidRegisterData = 'اطلاعات ارسال شده برای ثبت نام صحیح نمی باشد',
   someThingWrong = 'خطایی پیش امده است',
+  invalidEmail = 'ایمیل وارد شده صحیح نیست',
 }
 
 export enum AuthMessage {
@@ -32,6 +33,8 @@ export enum NotFoundMessage {
 
 export enum ValidationMessage {
   InvalidImageFormat = 'فرمت فایل صحیح نیست',
+  InvalidEmailFormat = 'فرمت ایمیل اشتباه است',
+  InvalidPhoneNumberFormat = 'فرمت شماره موبایل اشتباه است',
 }
 
 export enum ConflictMessage {

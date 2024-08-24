@@ -1,9 +1,10 @@
-import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
   IsEnum,
   IsMobilePhone,
   IsOptional,
+  IsString,
   Length,
 } from 'class-validator';
 import { Gender } from '../enums/gender.enum';
@@ -49,4 +50,11 @@ export class ChangePhone {
     },
   )
   phone: string;
+}
+
+export class ChangeUsernameDto {
+  @ApiProperty({ required: true })
+  @IsString()
+  @Length(5, 50)
+  username: string;
 }

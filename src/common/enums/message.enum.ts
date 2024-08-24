@@ -40,4 +40,6 @@ export enum ValidationMessage {
 export enum ConflictMessage {
   CategoryTitle = 'عنوان موجود است',
   Email = 'ایمیل تکراری است',
+  Phone = 'شماره موبایل تکراری است',
+  Username = 'نام گاربری تکراری است',
 }

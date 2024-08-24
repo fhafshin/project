@@ -4,7 +4,6 @@ import {
   Get,
   Patch,
   Post,
-  Put,
   Res,
   UseGuards,
   UseInterceptors,
@@ -12,7 +11,12 @@ import {
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { SwaggerConsumes } from 'src/common/enums/swagger-consumes.enum';
-import { ChangeEmail, ProfileDto } from './dto/create-profile-dto';
+import {
+  ChangeEmail,
+  ChangePhone,
+  ChangeUsernameDto,
+  ProfileDto,
+} from './dto/create-profile-dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { MulterStorage } from 'src/common/utils/multer.util';
 import { authguard } from '../auth/guards/auth.guard';
@@ -22,6 +26,7 @@ import { Response } from 'express';
 import { CookieKeys } from 'src/common/enums/cookie.enum';
 import { CookiesOptionsToken } from 'src/common/utils/cookiesOptionsToken';
 import { PublicMessage } from 'src/common/enums/message.enum';
+import { CheckOtpDto } from '../auth/dto/auth.dto';
 @UseGuards(authguard)
 @ApiBearerAuth('Authorization')
 @Controller('/users')
@@ -70,5 +75,31 @@ export class UserController {
 
     res.cookie(CookieKeys.EmailOTP, token, CookiesOptionsToken());
     res.json({ code, message: PublicMessage.sendOtp });
+  }
+
+  @Patch('/change-phone')
+  async changePhone(@Body() data: ChangePhone, @Res() res: Response) {
+    const { code, token, message } = await this.userService.changePhone(
+      data.phone,
+    );
+    if (message) return res.json({ message });
+
+    res.cookie(CookieKeys.PhoneOTP, token, CookiesOptionsToken());
+    res.json({ code, message: PublicMessage.sendOtp });
+  }
+
+  @Post('/verify-phone-otp')
+  verifyPhone(@Body() data: CheckOtpDto) {
+    return this.userService.verifyPhone(data.code);
+  }
+
+  @Post('/verify-email-otp')
+  verifyEmail(@Body() data: CheckOtpDto) {
+    return this.userService.verifyEmail(data.code);
+  }
+  @ApiConsumes(SwaggerConsumes.UrlEncoded)
+  @Patch('/change-username')
+  changeUsername(@Body() data: ChangeUsernameDto) {
+    return this.userService.changeUsername(data.username);
   }
 }

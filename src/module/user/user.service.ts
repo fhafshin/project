@@ -9,11 +9,11 @@ import {
 import { ProfileDto } from './dto/create-profile-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProfileEntity } from './entity/profile.entity';
-import { Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { UserEntity } from './entity/user.entity';
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
-import { isDate, NotEquals } from 'class-validator';
+import { isDate } from 'class-validator';
 import { Gender } from './enums/gender.enum';
 import { ProfileImages } from './types/file';
 import {
@@ -21,6 +21,7 @@ import {
   BadRequestMessage,
   ConflictMessage,
   NotFoundMessage,
+  PublicMessage,
 } from 'src/common/enums/message.enum';
 import { AuthService } from '../auth/auth.service';
 import { TokenService } from '../auth/tokens.service';
@@ -103,13 +104,13 @@ export class UserService {
     const { id } = this.request.user;
     console.log(email);
     const user = await this.userRepository.findOne({
-      where: { email: email },
+      where: { email },
     });
 
     if (user && user.id !== id)
       throw new ConflictException(ConflictMessage.Email);
     else if (user && user.id === id) return { message: 'updated' };
-    user.new_email = email;
+    await this.userRepository.update({ id }, { new_email: email });
     const otp = await this.authService.sendAndSaveOtp(id, AuthMethod.Email);
     const token = this.tokenService.createEmailToken({ email });
     return {
@@ -130,6 +131,52 @@ export class UserService {
 
     if (otp.method !== AuthMethod.Email)
       throw new BadRequestException(BadRequestMessage.someThingWrong);
+
+    await this.userRepository.update(
+      { id: userId },
+      { email, verify_email: true, new_email: null },
+    );
+
+    return { message: PublicMessage.Created };
+  }
+  async changePhone(phone: string) {
+    const { id } = this.request.user;
+    console.log(phone);
+    const user = await this.userRepository.findOne({
+      where: { phone },
+    });
+
+    if (user && user.id !== id)
+      throw new ConflictException(ConflictMessage.Phone);
+    else if (user && user.id === id) return { message: 'updated' };
+    await this.userRepository.update({ id }, { new_phone: phone });
+    const otp = await this.authService.sendAndSaveOtp(id, AuthMethod.Phone);
+    const token = this.tokenService.createPhoneToken({ phone });
+    return {
+      code: otp.code,
+      token,
+    };
+  }
+  async verifyPhone(code: string) {
+    const { id: userId, new_phone } = this.request.user;
+
+    const token = this.request.cookies?.[CookieKeys.PhoneOTP];
+    if (!token) throw new UnauthorizedException(AuthMessage.ExpiredCode);
+    const { phone } = this.tokenService.verifyPhoneToken(token);
+
+    const otp = await this.checkOtp(userId, code);
+    if (phone !== new_phone)
+      throw new BadRequestException(BadRequestMessage.someThingWrong);
+
+    if (otp.method !== AuthMethod.Phone)
+      throw new BadRequestException(BadRequestMessage.someThingWrong);
+
+    await this.userRepository.update(
+      { id: userId },
+      { phone, verify_phone: true, new_phone: null },
+    );
+
+    return { message: PublicMessage.Created };
   }
 
   async checkOtp(userId: number, code: string) {
@@ -141,5 +188,17 @@ export class UserService {
     if (otp.code !== code) throw new BadRequestException(AuthMessage.TryAgain);
 
     return otp;
+  }
+
+  async changeUsername(username: string) {
+    const { id } = this.request.user;
+    const user = await this.userRepository.findOneBy({ username });
+    if (user && user.id !== id)
+      throw new ConflictException(ConflictMessage.Username);
+    else if (user && user.id === id) return { message: PublicMessage.Updated };
+    await this.userRepository.update({ id }, { username });
+    return {
+      message: PublicMessage.Updated,
+    };
   }
 }

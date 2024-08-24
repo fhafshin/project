@@ -24,6 +24,8 @@ export class UserEntity extends BaseEntity {
   created_at: Date;
   @UpdateDateColumn()
   updated_at: Date;
+  @Column({ nullable: true })
+  new_phone: string;
 
   @Column({ nullable: true })
   new_email: string;

@@ -13,7 +13,8 @@ import {
 import { BlogStatus } from '../enum/status.enum';
 import { UserEntity } from 'src/module/user/entity/user.entity';
 import { BlogLikesEntity } from './like.entity';
-import { BookmarkEntity } from './bookmark.entity';
+import { BlogCommentEntity } from './comment.entity';
+import { BlogBookmarkEntity } from './bookmark.entity';
 @Entity(EntityNames.Blog)
 export class BlogEntity extends BaseEntity {
   @Column()
@@ -32,6 +33,12 @@ export class BlogEntity extends BaseEntity {
   @Column({ default: BlogStatus.Draft })
   @ApiProperty({ enum: BlogStatus, default: BlogStatus.Draft })
   status: BlogStatus;
+
+  @Column({ unique: true })
+  slug: string;
+  @Column()
+  time_for_study: number;
+
   @CreateDateColumn()
   created_at: Date;
   @UpdateDateColumn()
@@ -46,6 +53,9 @@ export class BlogEntity extends BaseEntity {
   @OneToMany(() => BlogLikesEntity, (blog_likes) => blog_likes.blog)
   likes: BlogLikesEntity[];
 
-  @OneToMany(() => BookmarkEntity, (bookmark) => bookmark.blog)
-  bookmarks: BookmarkEntity[];
+  @OneToMany(() => BlogBookmarkEntity, (blog_bookmarks) => blog_bookmarks.blog)
+  bookmarks: BlogBookmarkEntity[];
+
+  @OneToMany(() => BlogCommentEntity, (blog_comments) => blog_comments.blog)
+  comments: BlogCommentEntity[];
 }

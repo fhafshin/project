@@ -1,6 +1,15 @@
 import { BaseEntity } from 'src/common/abstracts/base.entity';
 import { EntityNames } from 'src/common/enums/entity.enum';
-import { Column, CreateDateColumn, Entity } from 'typeorm';
+import { UserEntity } from 'src/module/user/entity/user.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
+import { BlogEntity } from './blog.entity';
 @Entity(EntityNames.BlogComments)
 export class BlogCommentEntity extends BaseEntity {
   @Column()
@@ -15,4 +24,23 @@ export class BlogCommentEntity extends BaseEntity {
   userId: number;
   @CreateDateColumn()
   created_at: Date;
+
+  @ManyToOne(() => UserEntity, (user) => user.blog_comments, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'userId' })
+  user: UserEntity;
+
+  @ManyToOne(() => BlogEntity, (blog) => blog.comments, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'blogId' })
+  blog: BlogEntity;
+
+  @ManyToOne(() => BlogCommentEntity, (parent) => parent.children, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'parentId' })
+  parent: BlogCommentEntity;
+
+  @OneToMany(() => BlogCommentEntity, (comment) => comment.parent)
+  children: BlogCommentEntity[];
 }

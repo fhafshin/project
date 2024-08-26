@@ -9,6 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule); //show file in url
   SwaggerConfigInit(app);
   app.useStaticAssets('public'); //show file in url
+  app.enableCors();
   app.use(cookieParser(process.env.COOKIE_SECRET));
   app.useGlobalPipes(new ValidationPipe());
   const { APP_PORT } = process.env;

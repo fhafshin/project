@@ -5,7 +5,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BlogEntity } from './blog.entity';
 
 @Entity(EntityNames.BlogBookmarks)
-export class BookmarkEntity extends BaseEntity {
+export class BlogBookmarkEntity extends BaseEntity {
   @Column()
   blogId: number;
 

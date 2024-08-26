@@ -12,7 +12,8 @@ import { ProfileEntity } from './profile.entity';
 import { OtpEntity } from './otp.entity';
 import { BlogEntity } from 'src/module/blog/entity/blog.entity';
 import { BlogLikesEntity } from 'src/module/blog/entity/like.entity';
-import { BookmarkEntity } from 'src/module/blog/entity/bookmark.entity';
+import { BlogCommentEntity } from 'src/module/blog/entity/comment.entity';
+import { BlogBookmarkEntity } from 'src/module/blog/entity/bookmark.entity';
 
 @Entity(EntityNames.User)
 export class UserEntity extends BaseEntity {
@@ -49,6 +50,9 @@ export class UserEntity extends BaseEntity {
   @OneToMany(() => BlogLikesEntity, (likes) => likes.user)
   blog_likes: BlogLikesEntity[];
 
-  @OneToMany(() => BookmarkEntity, (bookmark) => bookmark.user)
-  blog_bookmarks: BookmarkEntity[];
+  @OneToMany(() => BlogBookmarkEntity, (bookmark) => bookmark.user)
+  blog_bookmarks: BlogBookmarkEntity[];
+
+  @OneToMany(() => BlogCommentEntity, (comment) => comment.user)
+  blog_comments: BlogCommentEntity[];
 }

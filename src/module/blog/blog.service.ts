@@ -1,4 +1,4 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Scope } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlogEntity } from './entity/blog.entity';
 import { Repository } from 'typeorm';
@@ -7,12 +7,18 @@ import { createSlug, randomId } from 'src/common/utils/function.util';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { BlogStatus } from './enum/status.enum';
-import { PublicMessage } from 'src/common/enums/message.enum';
+import {
+  BadRequestMessage,
+  PublicMessage,
+} from 'src/common/enums/message.enum';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import {
   PaginationGenerator,
   PaginationSolver,
 } from 'src/common/utils/pagination.util';
+import { CategoryService } from '../category/category.service';
+import { isArray } from 'class-validator';
+import { BlogCategoryEntity } from './entity/blog-category.entity';
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -20,11 +26,23 @@ export class BlogService {
     @InjectRepository(BlogEntity)
     private blogRepository: Repository<BlogEntity>,
     @Inject(REQUEST) private req: Request,
+    private categoryService: CategoryService,
+    @InjectRepository(BlogCategoryEntity)
+    private blogCategoryRepository: Repository<BlogCategoryEntity>,
   ) {}
 
   async create(data: CreateBlogDto) {
     const { id: authorId } = this.req.user;
     const { title, content, description, image, time_for_study } = data;
+
+    let { categories } = data;
+
+    if (!isArray(categories) && typeof categories === 'string') {
+      categories = categories.split(',');
+    } else if (!categories) {
+      throw new BadRequestException(BadRequestMessage.invalidCategory);
+    }
+
     let { slug } = data;
     let newSlug = slug ?? title;
     newSlug = createSlug(newSlug);
@@ -32,7 +50,7 @@ export class BlogService {
     if (isExist) {
       slug += `-${randomId}`;
     }
-    const blog = this.blogRepository.create({
+    let blog = this.blogRepository.create({
       title,
       slug: newSlug,
       content,
@@ -42,6 +60,18 @@ export class BlogService {
       authorId,
       status: BlogStatus.Draft,
     });
+
+    for (const categoryTitle of categories) {
+      let category = await this.categoryService.findOneByTitle(categoryTitle);
+      if (!category) {
+        category = await this.categoryService.createByTitle(categoryTitle);
+      }
+
+      await this.blogCategoryRepository.insert({
+        blogId: blog.id,
+        categoryId: category.id,
+      });
+    }
 
     await this.blogRepository.save(blog);
     return {

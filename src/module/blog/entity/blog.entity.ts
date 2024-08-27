@@ -38,7 +38,7 @@ export class BlogEntity extends BaseEntity {
   @Column({ unique: true })
   slug: string;
   @Column()
-  time_for_study: number;
+  time_for_study: string;
 
   @CreateDateColumn()
   created_at: Date;

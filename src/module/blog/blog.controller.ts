@@ -19,7 +19,6 @@ export class BlogController {
   create(@Body() data: CreateBlogDto) {
     return this.blogService.create(data);
   }
-
   @Get('/my')
   myBlogs() {
     return this.blogService.myBlogs();

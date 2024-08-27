@@ -55,4 +55,7 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => BlogCommentEntity, (comment) => comment.user)
   blog_comments: BlogCommentEntity[];
+
+  // @OneToMany(() => BlogCommentEntity, (blog_category) => blog_category.user)
+  // blog_categories: BlogCategoryEntity[];
 }

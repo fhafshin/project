@@ -31,5 +31,3 @@ export class CreateBlogDto {
   @IsNumber()
   time_for_study: number;
 }
-
-export class UpdateBlogDto extends PartialType(CreateBlogDto) {}

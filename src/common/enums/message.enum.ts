@@ -23,6 +23,8 @@ export enum PublicMessage {
   Deleted = 'با موفقیت حذف شد',
   Updated = 'با موفقیت به روز رسانی شد',
   Inserted = 'با موفقیت اضافه شد',
+  Like = 'پسند شما افزوده شد',
+  Dislike = 'پسند شما حذف شد',
 }
 
 export enum NotFoundMessage {

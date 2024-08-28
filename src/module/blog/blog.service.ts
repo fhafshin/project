@@ -15,7 +15,7 @@ import {
   Or,
   Repository,
 } from 'typeorm';
-import { CreateBlogDto, FilterBlogDto } from './dto/blogDto';
+import { CreateBlogDto, FilterBlogDto, UpdateBlogDto } from './dto/blogDto';
 import { createSlug, randomId } from 'src/common/utils/function.util';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
@@ -34,6 +34,7 @@ import { CategoryService } from '../category/category.service';
 import { isArray } from 'class-validator';
 import { BlogCategoryEntity } from './entity/blog-category.entity';
 import { EntityNames } from 'src/common/enums/entity.enum';
+import { BlogLikesEntity } from './entity/like.entity';
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -44,6 +45,8 @@ export class BlogService {
     private categoryService: CategoryService,
     @InjectRepository(BlogCategoryEntity)
     private blogCategoryRepository: Repository<BlogCategoryEntity>,
+    @InjectRepository(BlogLikesEntity)
+    private blogLikeRepository: Repository<BlogLikesEntity>,
   ) {}
 
   async create(data: CreateBlogDto) {
@@ -97,7 +100,7 @@ export class BlogService {
 
   async checkBlogBySlug(slug: string) {
     const blog = await this.blogRepository.findOneBy({ slug });
-    return !!blog;
+    return blog;
   }
 
   async myBlogs() {
@@ -132,9 +135,16 @@ export class BlogService {
 
       .leftJoin('blog.categories', 'categories')
       .leftJoin('categories.category', 'category')
-
-      .addSelect(['categories.id', 'category.title'])
+      .leftJoin('blog.author', 'author')
+      .leftJoin('author.profile', 'profile')
+      .addSelect([
+        'categories.id',
+        'category.title',
+        'author.username',
+        'profile.nick_name',
+      ])
       .where(where, { category, search })
+      .loadRelationCountAndMap('blog.likes', 'blog.likes')
       .orderBy('blog.id', 'DESC')
       .skip(skip)
       .take(limit)
@@ -165,6 +175,86 @@ export class BlogService {
     await this.blogRepository.delete({ id });
     return {
       message: PublicMessage.Deleted,
+    };
+  }
+
+  async update(id: number, data: UpdateBlogDto) {
+    const { title, content, description, image, time_for_study } = data;
+    const blog = await this.blogRepository.findOneBy({ id });
+
+    let { categories, slug } = data;
+
+    if (!isArray(categories) && typeof categories === 'string') {
+      categories = categories.split(',');
+    } else if (!categories) {
+      throw new BadRequestException(BadRequestMessage.invalidCategory);
+    }
+
+    let slugData = null;
+    if (title) {
+      slugData = title;
+      blog.title = title;
+    }
+    if (slug) slugData = slug;
+
+    if (slugData) {
+      slug = createSlug(slugData);
+      const isExist = await this.checkBlogBySlug(slug);
+      if (isExist && isExist.id !== id) {
+        slug += `${randomId()}`;
+      }
+    }
+
+    blog.slug = slug;
+
+    if (content) blog.content = content;
+    if (time_for_study) blog.time_for_study = time_for_study;
+    if (image) blog.image = image;
+    await this.blogRepository.save(blog);
+    if (categories && isArray(categories) && categories.length > 0) {
+      await this.blogCategoryRepository.delete({ blogId: blog.id });
+    }
+
+    for (const categoryTitle of categories) {
+      let category = await this.categoryService.findOneByTitle(categoryTitle);
+      if (!category) {
+        category = await this.categoryService.createByTitle(categoryTitle);
+      }
+
+      await this.blogCategoryRepository.insert({
+        blogId: blog.id,
+        categoryId: category.id,
+      });
+    }
+
+    return {
+      message: PublicMessage.Updated,
+    };
+  }
+
+  async checkExistBlogById(id: number) {
+    const blog = await this.blogRepository.findOneBy({ id });
+    if (!blog) throw new NotFoundException(NotFoundMessage.NotFoundPost);
+    return blog;
+  }
+
+  async likeToggle(blogId: number) {
+    await this.checkExistBlogById(blogId);
+    const { id: userId } = this.req.user;
+    let message = PublicMessage.Like;
+    const like = await this.blogLikeRepository.findOneBy({
+      blogId,
+      userId,
+    });
+    if (!like) {
+      this.blogLikeRepository.insert({ blogId, userId });
+    } else {
+      await this.blogLikeRepository.delete({ blogId });
+      message = PublicMessage.Dislike;
+    }
+
+    return {
+      message,
     };
   }
 }

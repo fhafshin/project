@@ -6,7 +6,7 @@ import {
 import { CreateCategoryDto } from './dto/create-category-dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entity/category.entity';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import {
   ConflictMessage,
   NotFoundMessage,
@@ -18,6 +18,7 @@ import {
   PaginationSolver,
 } from 'src/common/utils/pagination.util';
 import { UpdateCategoryDto } from './dto/update-category-dto';
+import { BlogEntity } from '../blog/entity/blog.entity';
 
 @Injectable()
 export class CategoryService {
@@ -48,11 +49,12 @@ export class CategoryService {
     return title;
   }
 
-  async findAll(data: PaginationDto) {
-    const { page, limit, skip } = PaginationSolver(data);
+  async findAll(paginationDto: PaginationDto) {
+    const { page, limit, skip } = PaginationSolver(paginationDto);
+    const where: FindOptionsWhere<BlogEntity> = {};
 
     const [categories, count] = await this.categoryRepository.findAndCount({
-      where: {},
+      where: where,
       take: limit,
       skip,
     });

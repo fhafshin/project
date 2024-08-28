@@ -15,10 +15,6 @@ export class BlogCategoryEntity extends BaseEntity {
   @JoinColumn({ name: 'categoryId' })
   category: CategoryEntity;
 
-  //   @ManyToOne(() => UserEntity, (user) => user.blog_categories)
-  //   @JoinColumn({ name: 'userId' })
-  //   user: UserEntity;
-
   @ManyToOne(() => BlogEntity, (blog) => blog.categories, {
     onDelete: 'CASCADE',
   })

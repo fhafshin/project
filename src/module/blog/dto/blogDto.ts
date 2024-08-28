@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsNotEmpty,
@@ -33,4 +33,11 @@ export class CreateBlogDto {
   @ApiProperty({ type: String, isArray: true })
   @IsArray()
   categories: string[] | string;
+}
+
+export class FilterBlogDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  category: string;
+  search: string;
 }

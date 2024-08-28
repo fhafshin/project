@@ -1,14 +1,28 @@
-import { BadRequestException, Inject, Injectable, Scope } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  Scope,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlogEntity } from './entity/blog.entity';
-import { Repository } from 'typeorm';
-import { CreateBlogDto } from './dto/blogDto';
+import {
+  And,
+  Equal,
+  FindOptionsWhere,
+  MoreThan,
+  Or,
+  Repository,
+} from 'typeorm';
+import { CreateBlogDto, FilterBlogDto } from './dto/blogDto';
 import { createSlug, randomId } from 'src/common/utils/function.util';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { BlogStatus } from './enum/status.enum';
 import {
   BadRequestMessage,
+  NotFoundMessage,
   PublicMessage,
 } from 'src/common/enums/message.enum';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
@@ -19,6 +33,7 @@ import {
 import { CategoryService } from '../category/category.service';
 import { isArray } from 'class-validator';
 import { BlogCategoryEntity } from './entity/blog-category.entity';
+import { EntityNames } from 'src/common/enums/entity.enum';
 
 @Injectable({ scope: Scope.REQUEST })
 export class BlogService {
@@ -50,7 +65,7 @@ export class BlogService {
     if (isExist) {
       slug += `-${randomId}`;
     }
-    let blog = this.blogRepository.create({
+    const blog = this.blogRepository.create({
       title,
       slug: newSlug,
       content,
@@ -60,6 +75,8 @@ export class BlogService {
       authorId,
       status: BlogStatus.Draft,
     });
+
+    await this.blogRepository.save(blog);
 
     for (const categoryTitle of categories) {
       let category = await this.categoryService.findOneByTitle(categoryTitle);
@@ -73,7 +90,6 @@ export class BlogService {
       });
     }
 
-    await this.blogRepository.save(blog);
     return {
       message: PublicMessage.Created,
     };
@@ -93,18 +109,62 @@ export class BlogService {
     return blogs;
   }
 
-  async blogList(data: PaginationDto) {
+  async blogList(data: PaginationDto, filterDto: FilterBlogDto) {
     const { page, limit, skip } = PaginationSolver(data);
-    const [blogs, count] = await this.blogRepository.findAndCount({
-      where: {},
-      order: { id: 'desc' },
-      skip,
-      take: limit,
-    });
+    let { category, search } = filterDto;
+    // const where: FindOptionsWhere<BlogEntity> = {};
+    let where = '';
+    if (category) {
+      // where['categories'] = {
+      //   category: { title: category },
+      // };
+      category = category.toLowerCase();
+      if (where.length > 0) where += ' AND ';
+      where += 'category.title=LOWER(:category)';
+    }
+    if (search) {
+      if (where.length > 0) where += ' AND ';
+      search = `%${search}%`;
+      where += 'CONCAT(blog.title,blog.description,blog.content) ILIKE :search';
+    }
+    const [blogs, count] = await this.blogRepository
+      .createQueryBuilder(EntityNames.Blog)
+
+      .leftJoin('blog.categories', 'categories')
+      .leftJoin('categories.category', 'category')
+
+      .addSelect(['categories.id', 'category.title'])
+      .where(where, { category, search })
+      .orderBy('blog.id', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    // const [blogs, count] = await this.blogRepository.findAndCount({
+    //   relations: { categories: { category: true } },
+    //   where,
+    //   order: { id: 'desc' },
+    //   skip,
+    //   take: limit,
+    //   select: {
+    //     id: true,
+    //     title: true,
+    //     categories: { id: true, category: { title: true } },
+    //   },
+    // });
 
     return {
       pagination: PaginationGenerator(count, page, limit),
       blogs,
+    };
+  }
+
+  async remove(id: number) {
+    const blog = await this.blogRepository.findOneBy({ id });
+    if (!blog) throw new NotFoundException(NotFoundMessage.NotFoundPost);
+    await this.blogRepository.delete({ id });
+    return {
+      message: PublicMessage.Deleted,
     };
   }
 }

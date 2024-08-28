@@ -6,7 +6,6 @@ import { SwaggerConsumes } from 'src/common/enums/swagger-consumes.enum';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { Pagination } from 'src/common/decorators/pagination.decorator';
 import { Delete } from '@nestjs/common';
-import { Put } from '@nestjs/common';
 import { Param } from '@nestjs/common';
 import { Patch } from '@nestjs/common';
 import { UpdateCategoryDto } from './dto/update-category-dto';
@@ -21,8 +20,8 @@ export class CategoryController {
   }
   @Pagination()
   @Get()
-  findAll(@Query() data: PaginationDto) {
-    return this.categoryService.findAll(data);
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.categoryService.findAll(paginationDto);
   }
 
   @Get('/:id')

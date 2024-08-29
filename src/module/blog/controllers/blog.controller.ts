@@ -11,14 +11,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { BlogService } from './blog.service';
-import { CreateBlogDto, FilterBlogDto, UpdateBlogDto } from './dto/blogDto';
-import { authguard } from '../auth/guards/auth.guard';
 import { SwaggerConsumes } from 'src/common/enums/swagger-consumes.enum';
 import { Pagination } from 'src/common/decorators/pagination.decorator';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { SkipAuth } from 'src/common/decorators/skip-auth.decorator';
 import { FilterBlog } from 'src/common/decorators/Filter.decorator';
+import { authguard } from 'src/module/auth/guards/auth.guard';
+import { BlogService } from '../services/blog.service';
+import { CreateBlogDto, FilterBlogDto, UpdateBlogDto } from '../dto/blogDto';
 
 @Controller('/blog')
 @ApiTags('blog')
@@ -62,5 +62,9 @@ export class BlogController {
   @Get('/like/:id')
   likeToggle(@Param('id', ParseIntPipe) id: number) {
     return this.blogService.likeToggle(id);
+  }
+  @Get('/bookmark/:id')
+  bookmarkToggle(@Param('id', ParseIntPipe) id: number) {
+    return this.blogService.bookmarkToggle(id);
   }
 }

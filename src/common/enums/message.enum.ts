@@ -25,6 +25,8 @@ export enum PublicMessage {
   Inserted = 'با موفقیت اضافه شد',
   Like = 'پسند شما افزوده شد',
   Dislike = 'پسند شما حذف شد',
+  bookmark = 'بوکمارک شد',
+  UnBookmark = 'بوکمارک برداشته شد',
 }
 
 export enum NotFoundMessage {

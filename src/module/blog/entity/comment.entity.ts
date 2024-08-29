@@ -18,7 +18,7 @@ export class BlogCommentEntity extends BaseEntity {
   accepted: boolean;
   @Column()
   blogId: number;
-  @Column()
+  @Column({ nullable: true })
   parentId: number;
   @Column()
   userId: number;

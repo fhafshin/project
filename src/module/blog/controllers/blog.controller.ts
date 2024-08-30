@@ -67,4 +67,10 @@ export class BlogController {
   bookmarkToggle(@Param('id', ParseIntPipe) id: number) {
     return this.blogService.bookmarkToggle(id);
   }
+  @SkipAuth()
+  @Pagination()
+  @Get('/by-slug/:slug')
+  findOne(@Param('id') slug: string, @Query() paginationDto: PaginationDto) {
+    return this.blogService.findOneBySlug(slug, paginationDto);
+  }
 }

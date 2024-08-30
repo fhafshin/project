@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { BlogCommentService } from '../services/comment.service';
 import { CreateCommentDto } from '../dto/comment.dto';
 import { authguard } from 'src/module/auth/guards/auth.guard';
@@ -22,5 +32,14 @@ export class BlogCommentController {
   @Pagination()
   find(@Query() data: PaginationDto) {
     return this.commentService.find(data);
+  }
+
+  @Put('/accept/:id')
+  accept(@Param('id', ParseIntPipe) id: number) {
+    return this.commentService.accept(id);
+  }
+  @Put('/reject/:id')
+  reject(@Param('id', ParseIntPipe) id: number) {
+    return this.commentService.reject(id);
   }
 }

@@ -4,6 +4,8 @@ export enum BadRequestMessage {
   someThingWrong = 'خطایی پیش امده است',
   invalidEmail = 'ایمیل وارد شده صحیح نیست',
   invalidCategory = 'دسته بندی به درستی وارد نشده است',
+  AlreadyAccepted = 'قبلا تایید شذه است',
+  AlreadyRejected = 'قبلا رد شذه است',
 }
 
 export enum AuthMessage {
@@ -34,6 +36,7 @@ export enum NotFoundMessage {
   NotFoundUser = 'کاربری یافت نشد',
   NotFoundPost = 'مقاله ای یافت نشد',
   NotFoundCategory = 'دسته بندی یافت نشد',
+  NotFoundComment = 'نظر یافت نشد',
 }
 
 export enum ValidationMessage {

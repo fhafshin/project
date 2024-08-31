@@ -7,6 +7,7 @@ import { UserModule } from './module/user/user.module';
 import { AuthModule } from './module/auth/auth.module';
 import { CategoryModule } from './module/category/category.module';
 import { BlogModule } from './module/blog/blog.module';
+import { ImageModule } from './module/image/image.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { BlogModule } from './module/blog/blog.module';
     AuthModule,
     CategoryModule,
     BlogModule,
+    ImageModule,
   ],
   controllers: [],
   providers: [],

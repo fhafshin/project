@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -318,14 +317,19 @@ export class BlogService {
       paginationDto,
       blog.id,
     );
-    const isLiked = !!(await this.blogLikeRepository.findOneBy({
-      userId,
-      blogId: blog.id,
-    }));
-    const isBookmarked = !!(await this.blogBookmarkRepository.findOneBy({
-      userId,
-      blogId: blog.id,
-    }));
+
+    let isLiked = false,
+      isBookmarked = false;
+    if (userId && !isNaN(userId) && userId > 0) {
+      isLiked = !!(await this.blogLikeRepository.findOneBy({
+        userId,
+        blogId: blog.id,
+      }));
+      isBookmarked = !!(await this.blogBookmarkRepository.findOneBy({
+        userId,
+        blogId: blog.id,
+      }));
+    }
 
     return {
       blog,

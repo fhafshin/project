@@ -14,6 +14,7 @@ import { BlogEntity } from 'src/module/blog/entity/blog.entity';
 import { BlogLikesEntity } from 'src/module/blog/entity/like.entity';
 import { BlogCommentEntity } from 'src/module/blog/entity/comment.entity';
 import { BlogBookmarkEntity } from 'src/module/blog/entity/bookmark.entity';
+import { ImageEntity } from 'src/module/image/entity/image.entity';
 
 @Entity(EntityNames.User)
 export class UserEntity extends BaseEntity {
@@ -56,6 +57,6 @@ export class UserEntity extends BaseEntity {
   @OneToMany(() => BlogCommentEntity, (comment) => comment.user)
   blog_comments: BlogCommentEntity[];
 
-  // @OneToMany(() => BlogCommentEntity, (blog_category) => blog_category.user)
-  // blog_categories: BlogCategoryEntity[];
+  @OneToMany(() => ImageEntity, (images) => images.user)
+  images: ImageEntity[];
 }

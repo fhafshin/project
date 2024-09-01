@@ -28,6 +28,7 @@ import { AuthResponse } from './types/response';
 import { CookieKeys } from 'src/common/enums/cookie.enum';
 import { REQUEST } from '@nestjs/core';
 import { CookiesOptionsToken } from 'src/common/utils/cookiesOptionsToken';
+import { KavenegarService } from '../http/kavenegar.service';
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
   constructor(
@@ -39,6 +40,7 @@ export class AuthService {
     private otpRepository: Repository<OtpEntity>,
     private tokenService: TokenService,
     @Inject(REQUEST) private req: Request,
+    private kavenegarService: KavenegarService,
   ) {}
 
   async userExistence(data: AuthDto, res: Response) {
@@ -47,13 +49,22 @@ export class AuthService {
     switch (type) {
       case AuthType.Login:
         result = await this.login(method, username);
+        await this.sendOtp(method, username, result.code);
         this.sendResponse(res, result);
 
       case AuthType.Register:
         result = await this.register(method, username);
+         await this.sendOtp(method, username, result.code);
+
         this.sendResponse(res, result);
       default:
         throw new UnauthorizedException();
+    }
+  }
+  async sendOtp(method: AuthMethod, username: string, code: string) {
+    if (method === AuthMethod.Email) {
+    } else if (method === AuthMethod.Phone) {
+      await this.kavenegarService.sendVerificationSms(username, code);
     }
   }
 
@@ -76,7 +87,7 @@ export class AuthService {
     const otp = await this.sendAndSaveOtp(user.id, method);
 
     const token = this.tokenService.createOtpToken({ userId: user.id });
-    return { code: otp.code, token };
+    return { code: otp.code, token, mobile: user.phone, method };
   }
   private async register(method: AuthMethod, username: string) {
     const validUsername = this.usernameValidator(method, username);

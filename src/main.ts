@@ -16,6 +16,7 @@ async function bootstrap() {
   const { DB_USERNAME, DB_PASSWORD } = process.env;
   console.log(DB_USERNAME);
   console.log(DB_PASSWORD);
+
   await app.listen(APP_PORT, () => {
     console.log(`app is running at port ${APP_PORT}`);
   });

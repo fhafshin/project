@@ -17,6 +17,8 @@ declare global {
       ACCESS_TOKEN_SECRET: string;
       EMAIL_TOKEN_SECRET: string;
       PHONE_TOKEN_SECRET: string;
+      LOCATION: string;
+      SEND_SMS_URL: string;
     }
   }
 }

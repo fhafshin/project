@@ -8,22 +8,20 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { SwaggerConsumes } from 'src/common/enums/swagger-consumes.enum';
 import { Pagination } from 'src/common/decorators/pagination.decorator';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { SkipAuth } from 'src/common/decorators/skip-auth.decorator';
 import { FilterBlog } from 'src/common/decorators/Filter.decorator';
-import { authguard } from 'src/module/auth/guards/auth.guard';
 import { BlogService } from '../services/blog.service';
 import { CreateBlogDto, FilterBlogDto, UpdateBlogDto } from '../dto/blogDto';
+import { AuthDecorator } from 'src/common/decorators/auth.decorator';
 
 @Controller('/blog')
 @ApiTags('blog')
-@UseGuards(authguard)
-@ApiBearerAuth('Authorization')
+@AuthDecorator()
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
   @ApiConsumes(SwaggerConsumes.UrlEncoded, SwaggerConsumes.Json)

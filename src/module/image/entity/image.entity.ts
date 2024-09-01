@@ -2,6 +2,7 @@ import { BaseEntity } from 'src/common/abstracts/base.entity';
 import { EntityNames } from 'src/common/enums/entity.enum';
 import { UserEntity } from 'src/module/user/entity/user.entity';
 import {
+  AfterLoad,
   Column,
   CreateDateColumn,
   Entity,
@@ -23,4 +24,8 @@ export class ImageEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (user) => user.images, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
+  @AfterLoad()
+  map() {
+    this.location = `${process.env.LOCATION}/${this.location}`;
+  }
 }

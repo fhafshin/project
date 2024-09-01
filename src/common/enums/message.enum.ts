@@ -37,6 +37,7 @@ export enum NotFoundMessage {
   NotFoundPost = 'مقاله ای یافت نشد',
   NotFoundCategory = 'دسته بندی یافت نشد',
   NotFoundComment = 'نظر یافت نشد',
+  NotFoundImage = 'تصویر یافت نشد',
 }
 
 export enum ValidationMessage {

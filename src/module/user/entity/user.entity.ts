@@ -15,6 +15,7 @@ import { BlogLikesEntity } from 'src/module/blog/entity/like.entity';
 import { BlogCommentEntity } from 'src/module/blog/entity/comment.entity';
 import { BlogBookmarkEntity } from 'src/module/blog/entity/bookmark.entity';
 import { ImageEntity } from 'src/module/image/entity/image.entity';
+import { Roles } from 'src/common/enums/role.enum';
 
 @Entity(EntityNames.User)
 export class UserEntity extends BaseEntity {
@@ -41,7 +42,8 @@ export class UserEntity extends BaseEntity {
   verify_phone: boolean;
   @OneToOne(() => ProfileEntity, (profile) => profile.user, { nullable: true })
   profile: ProfileEntity;
-
+  @Column({ default: Roles.User })
+  role: string;
   @OneToOne(() => OtpEntity, (otp) => otp.user)
   otp: OtpEntity;
 

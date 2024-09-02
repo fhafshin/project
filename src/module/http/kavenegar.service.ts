@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { catchError, lastValueFrom, map } from 'rxjs';
-import * as queryString from 'qs';
+import * as queryString from 'querystring';
 import { SmsTemplate } from './enum/sms-template.enum';
 @Injectable()
 export class KavenegarService {

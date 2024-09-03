@@ -16,6 +16,9 @@ import { BlogCommentEntity } from 'src/module/blog/entity/comment.entity';
 import { BlogBookmarkEntity } from 'src/module/blog/entity/bookmark.entity';
 import { ImageEntity } from 'src/module/image/entity/image.entity';
 import { Roles } from 'src/common/enums/role.enum';
+import { FollowEntity } from './follow.entity';
+import { UserService } from '../user.service';
+import { UserStatus } from 'src/common/enums/status.enum';
 
 @Entity(EntityNames.User)
 export class UserEntity extends BaseEntity {
@@ -33,6 +36,8 @@ export class UserEntity extends BaseEntity {
   updated_at: Date;
   @Column({ nullable: true })
   new_phone: string;
+  @Column({ nullable: true })
+  status: UserStatus;
 
   @Column({ nullable: true })
   new_email: string;
@@ -61,4 +66,9 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => ImageEntity, (images) => images.user)
   images: ImageEntity[];
+
+  @OneToMany(() => FollowEntity, (follow) => follow.following)
+  followers: FollowEntity[];
+  @OneToMany(() => FollowEntity, (follow) => follow.follower)
+  followings: FollowEntity[];
 }

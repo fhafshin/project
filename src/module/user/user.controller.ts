@@ -2,14 +2,16 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Patch,
   Post,
+  Query,
   Res,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
 import { SwaggerConsumes } from 'src/common/enums/swagger-consumes.enum';
 import {
   ChangeEmail,
@@ -19,16 +21,19 @@ import {
 } from './dto/create-profile-dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { MulterStorage } from 'src/common/utils/multer.util';
-import { authguard } from '../auth/guards/auth.guard';
 import { ProfileImages } from './types/file';
 import { UploadedOptionalFiles } from 'src/common/decorators/upload-file.decorator';
 import { Response } from 'express';
 import { CookieKeys } from 'src/common/enums/cookie.enum';
 import { CookiesOptionsToken } from 'src/common/utils/cookiesOptionsToken';
 import { PublicMessage } from 'src/common/enums/message.enum';
-import { CheckOtpDto } from '../auth/dto/auth.dto';
-@UseGuards(authguard)
-@ApiBearerAuth('Authorization')
+import { CheckOtpDto, UserBlockDto } from '../auth/dto/auth.dto';
+import { AuthDecorator } from 'src/common/decorators/auth.decorator';
+import { Pagination } from 'src/common/decorators/pagination.decorator';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { CanAccess } from 'src/common/decorators/role.decorator';
+import { Roles } from 'src/common/enums/role.enum';
+@AuthDecorator()
 @Controller('/users')
 @ApiTags('User')
 export class UserController {
@@ -101,5 +106,32 @@ export class UserController {
   @Patch('/change-username')
   changeUsername(@Body() data: ChangeUsernameDto) {
     return this.userService.changeUsername(data.username);
+  }
+  @AuthDecorator()
+  @Get('/follow/:userId')
+  @ApiParam({ name: 'userId' })
+  follow(@Param('userId', ParseIntPipe) userId: number) {
+    return this.userService.followToggle(userId);
+  }
+  @Get('/check-login')
+  checkLogin() {
+    return this.userService.checkLogin();
+  }
+
+  @Get('/followers')
+  @Pagination()
+  followers(@Query() paginationDto: PaginationDto) {
+    return this.userService.followers(paginationDto);
+  }
+  @Get('/following')
+  @Pagination()
+  following(@Query() paginationDto: PaginationDto) {
+    return this.userService.following(paginationDto);
+  }
+  @CanAccess(Roles.Admin)
+  @Post('/block')
+  @ApiConsumes(SwaggerConsumes.UrlEncoded)
+  block(@Body() userBlockDto: UserBlockDto) {
+    return this.userService.blockToggle(userBlockDto);
   }
 }

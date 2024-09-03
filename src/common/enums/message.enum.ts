@@ -16,6 +16,7 @@ export enum AuthMessage {
   TryAgain = 'دوباره تلاش کنید',
   LoginAgain = 'مجدا وارد حساب کاربری خود شوید',
   LoginIsRequired = 'لطفا وارد اکانت خود شوید',
+  BlockedUser = 'یوزر بلاک است',
 }
 
 export enum PublicMessage {
@@ -29,6 +30,10 @@ export enum PublicMessage {
   Dislike = 'پسند شما حذف شد',
   bookmark = 'بوکمارک شد',
   UnBookmark = 'بوکمارک برداشته شد',
+  Follow = 'فالو شد',
+  UnFollow = 'انفالو شد',
+  Blocked = 'بلاک شد',
+  UnBlocked = 'از بلاک برداشته شد',
 }
 
 export enum NotFoundMessage {

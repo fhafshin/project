@@ -49,12 +49,12 @@ export class AuthService {
     switch (type) {
       case AuthType.Login:
         result = await this.login(method, username);
-        await this.sendOtp(method, username, result.code);
+        // await this.sendOtp(method, username, result.code);
         this.sendResponse(res, result);
 
       case AuthType.Register:
         result = await this.register(method, username);
-         await this.sendOtp(method, username, result.code);
+        // await this.sendOtp(method, username, result.code);
 
         this.sendResponse(res, result);
       default:

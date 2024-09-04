@@ -77,7 +77,7 @@ export class BlogCommentService {
   async findCommentsByBlog(paginationDto: PaginationDto, blogId: number) {
     const { page, limit, skip } = PaginationSolver(paginationDto);
     const [comments, count] = await this.commentRepository.findAndCount({
-      where: { blogId, parentId: IsNull() },
+      where: { blogId, parentId: null },
       relations: {
         blog: true,
         user: { profile: true },
@@ -87,6 +87,7 @@ export class BlogCommentService {
         },
       },
       select: {
+        id: true,
         text: true,
         blog: { title: true },
         user: { username: true, profile: { nik_name: true } },

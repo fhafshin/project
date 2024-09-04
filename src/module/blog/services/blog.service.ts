@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BlogEntity } from '../entity/blog.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateBlogDto, FilterBlogDto, UpdateBlogDto } from '../dto/blogDto';
 import { createSlug, randomId } from 'src/common/utils/function.util';
 import { REQUEST } from '@nestjs/core';
@@ -45,6 +45,7 @@ export class BlogService {
     @InjectRepository(BlogBookmarkEntity)
     private blogBookmarkRepository: Repository<BlogBookmarkEntity>,
     private commentService: BlogCommentService,
+    private dataSource: DataSource,
   ) {}
 
   async create(data: CreateBlogDto) {
@@ -302,12 +303,7 @@ export class BlogService {
       .where({ slug })
       .loadRelationCountAndMap('blog.likes', 'blog.likes')
       .loadRelationCountAndMap('blog.bookmarks', 'blog.bookmarks')
-      .leftJoinAndSelect(
-        'blog.comments',
-        'comments',
-        'comments.accepted= :accepted',
-        { accepted: true },
-      )
+      .leftJoinAndSelect('blog.comments', 'comments')
 
       .getOne();
 
@@ -331,11 +327,49 @@ export class BlogService {
       }));
     }
 
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    const suggestBlogs = await queryRunner.query(`
+      WITH suggested_blogs as (
+      SELECT 
+          blog.*,
+          json_build_object(
+                   'username',u.username,
+                   'author_name',p.nik_name
+           ) as other,
+            array_agg(DISTINCT c.title),
+          (
+          SELECT COUNT(*) FROM blog_likes 
+          WHERE blog_likes."blogId" = blog.id
+          ) as likes,
+              (
+          SELECT COUNT(*) FROM blog_bookmarks 
+          WHERE blog_bookmarks."blogId" = blog.id
+          ) as bookmarks,
+              (
+          SELECT COUNT(*) FROM blog_comments
+          WHERE blog_comments."blogId" = blog.id
+          ) as comments
+
+          FROM blog
+          LEFT JOIN public.user u ON blog."authorId"=u.id 
+          LEFT JOIN public.profile p ON u.id=p."userId"
+          LEFT JOIN public.blog_category bc ON blog.id=bc."blogId"
+          LEFT JOIN public.category c ON bc."categoryId"=c.id
+          GROUP BY u.username,blog.id,p.nik_name
+          ORDER BY RANDOM()
+          LIMIT 3
+
+      )
+      SELECT * FROM suggested_blogs
+      `);
+
     return {
       blog,
       isLiked,
       isBookmarked,
       comments,
+      suggestBlogs,
     };
   }
 }

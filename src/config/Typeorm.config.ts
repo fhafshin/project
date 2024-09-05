@@ -12,7 +12,7 @@ export function TypeOrmConfig(): TypeOrmModuleOptions {
     database: DB_NAME,
     port: +DB_PORT,
     autoLoadEntities: false,
-    synchronize: false,
+    synchronize: true,
 
     entities: ['dist/**/**/*.entity.{ts,js}', 'dist/**/**/**/*.entity.{ts,js}'],
   };

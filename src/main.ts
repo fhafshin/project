@@ -22,3 +22,8 @@ async function bootstrap() {
   });
 }
 bootstrap();
+//ACID
+//A=>atomicity اتمی
+//C=>consistency سازگاری
+//I=>Isolation ایزوله
+//D=>Durability دوام

@@ -14,7 +14,7 @@ const dataSource = new DataSource({
   synchronize: false,
   entities: ['dist/**/**/*.entity.{ts,js}', 'dist/**/**/**/*.entity.{ts,js}'],
 
-  migrations: ['dist/src/migrations/*{.ts,.js}'],
+  migrations: ['dist/migrations/*{.ts,.js}'],
   migrationsTableName: 'paper_migration_db',
 });
 

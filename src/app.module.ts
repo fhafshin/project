@@ -9,6 +9,8 @@ import { CategoryModule } from './module/category/category.module';
 import { BlogModule } from './module/blog/blog.module';
 import { ImageModule } from './module/image/image.module';
 import { CustomHttpModule } from './module/http/http.module';
+import { WalletModule } from './module/wallet/wallet.module';
+import { UserWalletModule } from './module/userWallet/userWallet.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { CustomHttpModule } from './module/http/http.module';
     BlogModule,
     ImageModule,
     CustomHttpModule,
+    WalletModule,
+    UserWalletModule,
   ],
   controllers: [],
   providers: [],

@@ -16,11 +16,15 @@ export class WalletEntity {
   @CreateDateColumn()
   created_at: Date;
   @Column({ type: 'enum', enum: WalletType })
-  type: WalletType;
+  type: string;
+  @Column({ type: 'numeric' })
+  amount: number;
   @Column()
   invoice_number: string;
   @Column()
   userId: number;
+  @Column({ nullable: true })
+  reason: string;
   @ManyToOne(() => UserWalletEntity, (user) => user.transactions, {
     onDelete: 'CASCADE',
   })

@@ -1,8 +1,7 @@
 import { Request } from 'express';
 import { mkdirSync } from 'fs';
 import { extname, join } from 'path';
-import { ValidationMessage } from '../enums/message.enum';
-import { BadRequestException } from '@nestjs/common';
+
 import { diskStorage } from 'multer';
 export type callBackDestination = (error: Error, destination: string) => void;
 
@@ -22,32 +21,22 @@ export function multerDestination(filedName: string) {
   };
 }
 
-export function multerFileName(extensions: string[]) {
+export function multerFileName() {
   return function (
     req: Request,
     file: MulterFile,
     callBack: callBackFilename,
   ): void {
     const ext = extname(file.originalname);
-    if (isValidImageFormat(ext, extensions)) {
-      const filename = `${Date.now()}${ext}`;
-      callBack(null, filename);
-    } else {
-      callBack(
-        new BadRequestException(ValidationMessage.InvalidImageFormat),
-        null,
-      );
-    }
+
+    const filename = `${Date.now()}${ext}`;
+    callBack(null, filename);
   };
 }
 
-function isValidImageFormat(ext: string, extList: string[]) {
-  return [...extList].includes(ext.toLowerCase());
-}
-
-export function MulterStorage(folderName: string, extensions: string[]) {
+export function MulterStorage(folderName: string) {
   return diskStorage({
     destination: multerDestination(folderName),
-    filename: multerFileName(extensions),
+    filename: multerFileName(),
   });
 }

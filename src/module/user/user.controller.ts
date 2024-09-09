@@ -11,7 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiBody, ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiParam, ApiTags } from '@nestjs/swagger';
 import { SwaggerConsumes } from 'src/common/enums/swagger-consumes.enum';
 import {
   ChangeEmail,
@@ -50,7 +50,7 @@ export class UserController {
         { name: 'image_profile', maxCount: 1 },
       ],
       {
-        storage: MulterStorage('user-profile', ['.jpg', '.jpeg', '.png']),
+        storage: MulterStorage('user-profile'),
       },
     ),
   )
